@@ -1,14 +1,12 @@
-FROM golang:1.21 AS build
+FROM golang:1.21 AS builder
 
 WORKDIR /app
 COPY . .
-
 RUN go mod tidy
-RUN go build -o app
+RUN CGO_ENABLED=0 GOOS=linux go build -o app
 
-FROM debian:bookworm-slim
+FROM scratch
 
-WORKDIR /app
-COPY --from=build /app/app .
+COPY --from=builder /app/app /app
 
-ENTRYPOINT ["./app"]
+ENTRYPOINT ["/app"]
